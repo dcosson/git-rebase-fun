@@ -8,17 +8,10 @@ Tracking down failure cases when rebasing git branches
 You can see in the git history of this project that by either rebasing or merging `feature-a-squashed` into `feature-b`, you get a merge conflict. Yet `feature-b` branched directly off of `feature-a`, so if we hadn't squashed there couldn't be merge conflicts.
 
 
-A solution to this seems to be, from feature-b, run `git rebase -Xtheirs feature-a-squashed`.
+However, there seems to be a simple solution. You should rebase, and since you know that all the conflicting commits from `feature-a` are exactly the same as the merge commit, whenever the merge conflicts come up you should be able to just run `git rebase --skip` like it suggests and it'll work out.
 
-The real-world scenario we were simulating though is when `feature-a-squashed` gets rebased onto master, and master might have some other commits in the meantime that `feature-b` doesn't have. But the following commands (run from `feature-b`) should work in that case:
 
-```
-git fetch
-git merge origin/master^
-git rebase -Xtheirs origin/master
-```
-
-There's a quirk that now all the individual commits in feature-a still exist in feature-b, but those can be squashed later. For instance you could run `git rebase -i $(git merge-base HEAD origin/master)^` and then manually `fixup` the commits you no longer want.
+If you were running this where `feature-a-squashed` was actually the tip of master (say feature-a was PR that went out and you rebase PR's to the tip of master instead of merging to keep a linear history), you'd probably also want to run `git merge origin/master^` before `git rebase origin/master`, to separately resolve any other conflicts you might have with master before the rebase where you'll skip all conflicts.
 
 
 ### Example text:
